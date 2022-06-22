@@ -57,7 +57,9 @@ public partial class Car : MonoBehaviour
     private float handbrakeTime;
     private float handbrakeTimer;
     private Skidmarks skidmarks;
-    private ParticleEmitter skidSmoke;
+    //private ParticleEmitter skidSmoke;
+    private ParticleSystem skidSmoke;
+    
     public float[] skidmarkTime;
     private SoundController sound;
     private bool canSteer;
@@ -67,7 +69,7 @@ public partial class Car : MonoBehaviour
         this.wheels = new Wheel[this.frontWheels.Length + this.rearWheels.Length];
         this.sound = (SoundController) this.transform.GetComponent(typeof(SoundController));
          // Measuring 1 - 60
-        accelerationTimer = Time.time;
+        //accelerationTimer = Time.time;
         this.SetupWheelColliders();
         this.SetupCenterOfMass();
         this.topSpeed = this.Convert_Miles_Per_Hour_To_Meters_Per_Second(this.topSpeed);
@@ -145,12 +147,14 @@ public partial class Car : MonoBehaviour
         }
         js.damper = this.suspensionDamper;
         wc.suspensionSpring = js;
-        wheel = new Wheel();
+        Wheel wheel = new Wheel();
         wheel.collider = wc;
         wc.sidewaysFriction = this.wfc;
         wheel.wheelGraphic = wheelTransform;
-        wheel.tireGraphic = wheelTransform.GetComponentsInChildren(typeof(Transform))[1];
+        //wheel.tireGraphic = wheelTransform.GetComponentsInChildren(typeof(Transform))[1];
+        wheel.tireGraphic = wheelTransform.GetChild(1); //GetComponentsInChildren(typeof(Transform))[1];
         this.wheelRadius = wheel.tireGraphic.GetComponent<Renderer>().bounds.size.y / 2;
+
         wheel.collider.radius = this.wheelRadius;
         if (isFrontWheel)
         {
@@ -210,17 +214,19 @@ public partial class Car : MonoBehaviour
         if ((Skidmarks) UnityEngine.Object.FindObjectOfType(typeof(Skidmarks)))
         {
             this.skidmarks = (Skidmarks) UnityEngine.Object.FindObjectOfType(typeof(Skidmarks));
-            this.skidSmoke = (ParticleEmitter) this.skidmarks.GetComponentInChildren(typeof(ParticleEmitter));
+            //this.skidSmoke = (ParticleEmitter) this.skidmarks.GetComponentInChildren(typeof(ParticleEmitter));
         }
         else
         {
             Debug.Log("No skidmarks object found. Skidmarks will not be drawn");
         }
-        this.skidmarkTime = new float[4];
+        this.skidmarkTime = new float[4] { 0f, 0f, 0f, 0f };
+    /*
         foreach (float f in this.skidmarkTime)
         {
             f = 0f;
         }
+        */
     }
 
     /**************************************************/
@@ -303,7 +309,7 @@ public partial class Car : MonoBehaviour
         this.currentEnginePower = 0;
     }
 
-    public float wheelCount;
+    public int wheelCount;
     public virtual void UpdateWheelGraphics(Vector3 relativeVelocity)
     {
         this.wheelCount = -1;
@@ -331,9 +337,10 @@ public partial class Car : MonoBehaviour
                         this.skidmarkTime[this.wheelCount] = 0f;
                         float handbrakeSkidding = this.handbrake && w.driveWheel ? w.wheelVelo.magnitude * 0.3f : 0;
                         float skidGroundSpeed = Mathf.Abs(w.groundSpeed.x) - 15;
+                        /*
                         if ((skidGroundSpeed > 0) || (handbrakeSkidding > 0))
                         {
-                            Vector3 staticVel = ((object) this.transform.TransformDirection(this.skidSmoke.localVelocity)) + this.skidSmoke.worldVelocity;
+                            Vector3 staticVel = Vector3.zero; //((object) this.transform.TransformDirection(this.skidSmoke.localVelocity)) + this.skidSmoke.worldVelocity;
                             if (w.lastSkidmark != -1)
                             {
                                 float emission = (float) UnityEngine.Random.Range(this.skidSmoke.minEmission, this.skidSmoke.maxEmission);
@@ -363,6 +370,7 @@ public partial class Car : MonoBehaviour
                             w.lastSkidmark = -1;
                             this.sound.Skid(false, 0);
                         }
+                        */
                     }
                 }
             }
@@ -469,7 +477,7 @@ public partial class Car : MonoBehaviour
         {
             if (this.HaveTheSameSign(relativeVelocity.z, this.throttle))
             {
-                normPower = (this.currentEnginePower / this.engineForceValues[this.engineForceValues.Length - 1]) * 2;
+                float normPower = (this.currentEnginePower / this.engineForceValues[this.engineForceValues.Length - 1]) * 2;
                 this.currentEnginePower = this.currentEnginePower + ((Time.deltaTime * 200) * this.EvaluateNormPower(normPower));
             }
             else
@@ -610,7 +618,7 @@ public partial class Car : MonoBehaviour
     {
         Vector3 relativeVelocity = this.transform.InverseTransformDirection(this.GetComponent<Rigidbody>().velocity);
         float lowLimit = this.currentGear == 0 ? 0 : this.gearSpeeds[this.currentGear - 1];
-        return (((relativeVelocity.z - lowLimit) / this.gearSpeeds[this.currentGear - lowLimit]) * (1 - (this.currentGear * 0.1f))) + (this.currentGear * 0.1f);
+        return (((relativeVelocity.z - lowLimit) / this.gearSpeeds[this.currentGear] - lowLimit) * (1f - (this.currentGear * 0.1f))) + (this.currentGear * 0.1f);
     }
 
     public Car()

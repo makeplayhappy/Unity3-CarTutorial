@@ -5,8 +5,9 @@ public class BirdsBehaviour : MonoBehaviour
 {
 	public Transform birdsPrefab;
 	float birdTimer;
-	ParticleAnimator animator;
-	ParticleEmitter emitter;
+	//ParticleAnimator animator;
+	//ParticleEmitter emitter;
+	ParticleSystem particleSystem;
 	
 	void Start()
 	{
@@ -32,9 +33,9 @@ public class BirdsBehaviour : MonoBehaviour
 //		transform.LookAt(new Vector3(0, transform.position.y, Random.Range(-80f, -50f)) );
 		
 		Transform birds = (Transform)Instantiate(birdsPrefab, transform.position, transform.rotation);
-		animator = birds.GetComponentInChildren(typeof(ParticleAnimator)) as ParticleAnimator;
+		//animator = birds.GetComponentInChildren(typeof(ParticleAnimator)) as ParticleAnimator;
 		//animator.force = new Vector3(0, Random.Range(-0.3f, 0.3f), 0);
-		emitter = birds.GetComponentInChildren(typeof(ParticleEmitter)) as ParticleEmitter;
+		//emitter = birds.GetComponentInChildren(typeof(ParticleEmitter)) as ParticleEmitter;
 		//emitter.emit = true;
 		
 		birdTimer = Time.time + Random.Range(5,20);

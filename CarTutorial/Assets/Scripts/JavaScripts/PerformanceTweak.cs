@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 [System.Serializable]
 public partial class PerformanceTweak : MonoBehaviour
@@ -8,8 +9,8 @@ public partial class PerformanceTweak : MonoBehaviour
     public Terrain terrain;
     public float messageTime;
     public float scrollTime;
-    private object[] messages;
-    private object[] times;
+    private List<string> messages;
+    private List<float> times;
     private float lastTime;
     private bool doneNotes;
     private float origDetailDist;
@@ -38,6 +39,7 @@ public partial class PerformanceTweak : MonoBehaviour
         float[] distances = new float[32];
         distances[16] = Camera.main.farClipPlane;
         Camera.main.layerCullDistances = distances;
+
     }
 
     public virtual void Update()
@@ -232,14 +234,20 @@ public partial class PerformanceTweak : MonoBehaviour
     public virtual void UpdateMessages()
     {
         float dt = Time.deltaTime;
-        foreach (object t in this.times)
+        for (int i = 0; i < this.times.Count; i++)
+        {
+            this.times[i] = this.times[i] - dt;
+        }
+/*
+        foreach (float t in this.times)
         {
             t = ((float) t) - dt;
         }
-        while ((this.times.Length > 0) && (this.times[0] < 0f))
+*/
+        while ((this.times.Count > 0) && (this.times[0] < 0f))
         {
-            this.times.Shift();
-            this.messages.Shift();
+            ShiftLeft(this.times,1);
+            ShiftLeft(this.messages,1);
         }
         this.lastTime = this.lastTime - dt;
         if (this.lastTime < 0f)
@@ -251,7 +259,7 @@ public partial class PerformanceTweak : MonoBehaviour
     public virtual void OnGUI()
     {
         int height = 15;
-        int n = this.messages.Length;
+        int n = this.messages.Count;
         Rect rc = new Rect(2, ((Screen.height - 2) - (n * height)) + ((this.lastTime / this.scrollTime) * height), 600, 20);
         int i = 0;
         while (i < n)
@@ -302,11 +310,25 @@ public partial class PerformanceTweak : MonoBehaviour
     {
         this.messageTime = 10f;
         this.scrollTime = 0.7f;
-        this.messages = new object[0];
-        this.times = new object[0];
+        this.messages = new List<string>();// object[0];
+        this.times = new List<float>();//new object[0];
         this.lowFPS = 15f;
         this.highFPS = 35f;
         this.skipChangesTimeout = 1f;
     }
+
+    public static void ShiftLeft<T>(List<T> lst, int shifts)
+    {
+        for (int i = shifts; i < lst.Count; i++)
+        {
+            lst[i - shifts] = lst[i];
+        }
+
+        for (int i = lst.Count - shifts; i < lst.Count; i++)
+        {
+            lst[i] = default(T);
+        }
+    }
+
 
 }
