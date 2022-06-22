@@ -1,3 +1,5 @@
+// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
 // Upgrade NOTE: replaced 'PositionFog()' with multiply of UNITY_MATRIX_MVP by position
 // Upgrade NOTE: replaced 'V2F_POS_FOG' with 'float4 pos : SV_POSITION'
 
@@ -35,8 +37,10 @@ Subshader {
 CGPROGRAM
 // Upgrade NOTE: excluded shader from OpenGL ES 2.0 because it uses non-square matrices
 #pragma exclude_renderers gles
-// Upgrade NOTE: excluded shader from Xbox360; has structs without semantics (struct v2f members ref,bumpuv,viewDir)
-#pragma exclude_renderers xbox360
+// Upgrade NOTE: excluded shader from DX11; has structs without semantics (struct v2f members ref,bumpuv,viewDir)
+#pragma exclude_renderers d3d11
+
+#pragma target 3.0
 #pragma vertex vert
 #pragma fragment frag
 #pragma fragmentoption ARB_precision_hint_fastest 
@@ -80,7 +84,7 @@ struct v2f {
 v2f vert(appdata v)
 {
 	v2f o;
-	o.pos = mul (UNITY_MATRIX_MVP, v.vertex);
+	o.pos = UnityObjectToClipPos (v.vertex);
 	
 	// scroll bump waves
 	float4 temp;
@@ -137,11 +141,14 @@ half4 frag( v2f i ) : COLOR
 	// perturb reflection/refraction UVs by bumpmap, and lookup colors
 	
 	#ifdef HAS_REFLECTION
-	float3 uv1 = i.ref; uv1.xy += bump * _ReflDistort;
+	float3 uv1 = i.ref; 
+	uv1.xy += bump * _ReflDistort;
 	half4 refl = tex2Dproj( _ReflectionTex, uv1 );
+//	half4 col = tex2Dproj( _GrabTexture, i.uvgrab.xyw );
 	#endif
 	#ifdef HAS_REFRACTION
-	float3 uv2 = i.ref; uv2.xy -= bump * _RefrDistort;
+	float3 uv2 = i.ref; 
+	uv2.xy -= bump * _RefrDistort;
 	half4 refr = tex2Dproj( _RefractionTex, uv2 ) * _RefrColor;
 	#endif
 	

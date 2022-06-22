@@ -1,4 +1,8 @@
+// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
 // Upgrade NOTE: replaced 'PositionFog()' with multiply of UNITY_MATRIX_MVP by position
+// Upgrade NOTE: excluded shader from DX11; has structs without semantics (struct v2f_pixel members normal,lightDirFade,uv)
+#pragma exclude_renderers d3d11
 // Upgrade NOTE: replaced 'V2F_POS_FOG' with 'float4 pos : SV_POSITION'
 
 // Upgrade NOTE: replaced '_PPLAmbient' with 'UNITY_LIGHTMODEL_AMBIENT'
@@ -102,7 +106,7 @@ float4 VertexlitSplatFragment (v2f_vertex i) : COLOR {
 
 v2f_vertex VertexlitSplatVertex (appdata_lightmap v) {
 	v2f_vertex o;
-	o.pos = mul (UNITY_MATRIX_MVP, v.vertex);
+	o.pos = UnityObjectToClipPos (v.vertex);
 	
 	float3 viewpos = mul(UNITY_MATRIX_MV, v.vertex).xyz;
 	o.color = CalculateVertexLights (viewpos, v.normal);
@@ -131,7 +135,7 @@ float4 AmbientSplatFragment (v2f_ambient i) : COLOR {
 
 v2f_ambient AmbientSplatVertex (appdata_lightmap v) {
 	v2f_ambient o;
-	o.pos = mul (UNITY_MATRIX_MVP, v.vertex);
+	o.pos = UnityObjectToClipPos (v.vertex);
 	
 	CALC_SPLAT_UV(v.texcoord.xy, v.texcoord1.xy);
 	
@@ -152,7 +156,7 @@ float4 PixellitSplatFragment (v2f_pixel i) : COLOR {
 
 v2f_pixel PixellitSplatVertex (appdata_lightmap v) {
 	v2f_pixel o;
-	o.pos = mul (UNITY_MATRIX_MVP, v.vertex);
+	o.pos = UnityObjectToClipPos (v.vertex);
 	CALC_SPLAT_UV(v.texcoord.xy, v.texcoord1.xy);
 	o.normal = v.normal;
 	o.lightDirFade.xyz = ObjSpaceLightDir( v.vertex );
@@ -177,7 +181,7 @@ float4 LightmapSplatFragment (v2f_vertex i) : COLOR {
 
 v2f_vertex LightmapSplatVertex (appdata_lightmap v) {
 	v2f_vertex o;
-	o.pos = mul (UNITY_MATRIX_MVP, v.vertex);
+	o.pos = UnityObjectToClipPos (v.vertex);
 	
 	CALC_SPLAT_UV(v.texcoord.xy, v.texcoord1.xy);
 
