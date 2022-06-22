@@ -1,3 +1,6 @@
+// Upgrade NOTE: replaced '_Object2World' with 'unity_ObjectToWorld'
+// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
 // Upgrade NOTE: replaced 'PositionFog()' with multiply of UNITY_MATRIX_MVP by position
 // Upgrade NOTE: replaced 'V2F_POS_FOG' with 'float4 pos : SV_POSITION'
 
@@ -19,6 +22,8 @@ Category {
 		Pass {
 			
 CGPROGRAM
+// Upgrade NOTE: excluded shader from DX11; has structs without semantics (struct v2f members normal,viewDir,rotNormal,uv)
+#pragma exclude_renderers d3d11
 // Upgrade NOTE: excluded shader from Xbox360; has structs without semantics (struct v2f members normal,viewDir,rotNormal,uv)
 #pragma exclude_renderers xbox360
 #pragma vertex vert
@@ -41,10 +46,10 @@ uniform float4 _Lightmap_ST;
 v2f vert (appdata_tan v)
 {	
 	v2f o;
-	o.pos = mul (UNITY_MATRIX_MVP, v.vertex);
-	o.normal = mul( (float3x3)_Object2World, v.normal );
+	o.pos = UnityObjectToClipPos (v.vertex);
+	o.normal = mul( (float3x3)unity_ObjectToWorld, v.normal );
 	o.rotNormal = mul( (float3x3)_RotMatrix, o.normal );
-	o.viewDir = mul( (float3x3)_Object2World, ObjSpaceViewDir(v.vertex) );
+	o.viewDir = mul( (float3x3)unity_ObjectToWorld, ObjSpaceViewDir(v.vertex) );
 	o.uv = TRANSFORM_TEX(v.texcoord, _Lightmap);
 	return o;
 }

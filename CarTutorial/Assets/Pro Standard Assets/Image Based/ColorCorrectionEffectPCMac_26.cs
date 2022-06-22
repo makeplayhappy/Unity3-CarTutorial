@@ -17,8 +17,8 @@ public class ColorCorrectionEffectPCMac_26 : ImageEffectBase {
 		{
 			case RuntimePlatform.OSXEditor:
 			case RuntimePlatform.OSXPlayer:
-			case RuntimePlatform.OSXWebPlayer:
-			case RuntimePlatform.OSXDashboardPlayer:
+			case RuntimePlatform.WebGLPlayer:
+			//case RuntimePlatform.OSXDashboardPlayer:
 				useMac = true;
 				break;
 			default:

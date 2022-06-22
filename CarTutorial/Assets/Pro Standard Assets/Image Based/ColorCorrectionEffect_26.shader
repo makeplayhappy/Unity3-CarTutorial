@@ -1,3 +1,5 @@
+// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
 Shader "Hidden/Grayscale Effect_26" {
 Properties {
 	_MainTex ("Base (RGB)", 2D) = "white" {}
@@ -19,7 +21,7 @@ CGPROGRAM
 v2f_img vert(appdata_img v)
 {
 	v2f_img o;
-	o.pos = mul(UNITY_MATRIX_MVP,v.vertex);
+	o.pos = UnityObjectToClipPos(v.vertex);
 	o.uv = v.texcoord;
 	
 	return o;

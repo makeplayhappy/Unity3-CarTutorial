@@ -33,9 +33,9 @@ public class BirdsBehaviour : MonoBehaviour
 		
 		Transform birds = (Transform)Instantiate(birdsPrefab, transform.position, transform.rotation);
 		animator = birds.GetComponentInChildren(typeof(ParticleAnimator)) as ParticleAnimator;
-		animator.force = new Vector3(0, Random.Range(-0.3f, 0.3f), 0);
+		//animator.force = new Vector3(0, Random.Range(-0.3f, 0.3f), 0);
 		emitter = birds.GetComponentInChildren(typeof(ParticleEmitter)) as ParticleEmitter;
-		emitter.emit = true;
+		//emitter.emit = true;
 		
 		birdTimer = Time.time + Random.Range(5,20);
 	}
