@@ -1,0 +1,240 @@
+<!DOCTYPE html><html>
+<head>
+<title></title>
+<style type="text/css">
+<!--
+.xflip {
+    -moz-transform: scaleX(-1);
+    -webkit-transform: scaleX(-1);
+    -o-transform: scaleX(-1);
+    transform: scaleX(-1);
+    filter: fliph;
+}
+.yflip {
+    -moz-transform: scaleY(-1);
+    -webkit-transform: scaleY(-1);
+    -o-transform: scaleY(-1);
+    transform: scaleY(-1);
+    filter: flipv;
+}
+.xyflip {
+    -moz-transform: scaleX(-1) scaleY(-1);
+    -webkit-transform: scaleX(-1) scaleY(-1);
+    -o-transform: scaleX(-1) scaleY(-1);
+    transform: scaleX(-1) scaleY(-1);
+    filter: fliph + flipv;
+}
+-->
+</style>
+</head>
+<body>
+<a name=1></a><img src="media/CarTutorialSection_2-1_1.png"/>
+<h1>“The Car Tutorial” Part 2</h1>
+<h2>Creating a Racing Game for Unity</h2>
+
+
+<img src="media/CarTutorialSection_2-2_4.png"/><br/>
+
+
+
+<hr/>
+
+<h1>Part 2: Tweaking the Car</h1>
+If you’ve followed along part 1 of this tutorial and assembled the car, you are already at a point <br/>
+where the car is pretty awesome. But if you have driven it around a bit, you will probably have <br/>
+noticed that there is after all room for some improvement.<br/>
+This is where tweaking enters the picture. In game development tweaking is a crucial part of making <br/>
+your game fun, challenging, awesome or whatever goal you have for your speciﬁ c game. The idea is <br/>
+that when you have setup the nuts and bolts that makes your game run, there might be something <br/>
+that doesn’t feel quite right - maybe you want the car handling to be a bit different, maybe you want <br/>
+the top speed to be slightly different, or maybe you want to change the scene lights.<br/>
+A major strength of Unity is it’s tweakability - as you have seen, all the public variables in your scripts <br/>
+are shown in the inspector, so you can change values without going into the code. And even more <br/>
+powerful: When you’ve made a change you just hit play, and you will instantly see the result of that <br/>
+change. You never have to wait for the scene to be rebuilt or for a major recompile of the code.<br/>
+<h2>Center of Mass</h2>
+Now the most obvious thing that needs to be tweaked is probably that the car can very easily be <br/>
+ﬂ ipped around when turning (if you haven’t tried yet, then play again and speed up a bit and <br/>
+then turn from side to side while speeding - the car will will ﬂ ip over pretty easily). The reason for <br/>
+this ﬂ ipping is that we haven’t yet deﬁ ned the car’s center of mass. All the forces that are applied <br/>
+to the Rigidbody of the car, are all applied at the Rigidbody’s center of mass. The center of mass <br/>
+of the Rigidbody will be calculated by Unity according to the Colliders attached to the Rigidbody, <br/>
+either on the same GameObject or on child objects. Since the center of mass of a car is typically not 
+the center of the car (and probably not the center of mass that Unity calculates), we want to set the <br/>
+center of mass ourselves.<br/>
+
+<img src="media/CarTutorialSection_2-4_4.png"/><br/>
+
+The position of the center of mass for a car de-<br/>
+pends on the placement of the engine and other <br/>
+factors, and it can vary a lot from one car model <br/>
+to another. For the car in this tutorial project the <br/>
+center of mass could be a little behind the engine, <br/>
+slightly above ﬂ oor height of the car. See it’s posi-<br/>
+tion in this image:<br/>
+•  Create a new GameObject and drag it to the <b>Car</b> game object.<br/>
+•  Rename it to <b>CenterOfMass</b><br/>
+•  Reset the <b>CenterOfMass’s</b> Transform (click the little cog wheel to the right of the Transform in <br/>
+the Inspector and select ‘<b>Reset</b>’. This will give it the same position as its parent, the car.<br/>
+•  Adjust its position to somewhere you like. Either do it by dragging, or type in the position. A <br/>
+good position for this car’s center of mass could be (0, 0.1, 0.65).<br/>
+•  In the Inspector assign the <b>CenterOfMass</b> to the slot for it in the Car script Component.<br/>
+In general, it is a bad idea to have the center of mass be positioned to either side of the center in <br/>
+the x-axis, because this will make the steering behave oddly, and thus we have also set the x vari-<br/>
+able of the position to 0.<br/>
+You can also change the Camera’s target to be the CenterOfMass Game Object instead of the car <br/>
+itself. This will give a slightly different feeling - play around with it and decide which setting you <br/>
+like the most.<br/>
+
+<hr/>
+
+<img src="media/CarTutorialSection_2-5_4.png"/><br/>
+<img src="media/CarTutorialSection_2-5_5.png"/><br/>
+
+<h2>Suspension</h2>
+Another factor that can heavily change the behavior of the car is the properties of its suspension. <br/>
+The job of a car suspension is to maximize the friction between the tires and the road surface. <br/>
+When you are driving the car over a bump, all of the wheel’s vertical energy gets transfered to the <br/>
+frame. If we did not have an intervening structure, this could easily result in the wheel loosing con-<br/>
+tact with the road completely, and afterwards slamming down into the road because of the force <br/>
+of gravity. The suspension is that intervening structure. <br/>
+We have three different variables to tweak from the Inspector - the range, the damper and the <br/>
+spring. All are part of the WheelCollider class that we use on the car’s wheels.<br/>
+To the left we see the car with the standard settings, and to the right we see it with a much larger <br/>
+suspension range. Combined with the spring and damper properties, you can make it behave like <br/>
+everything from a formula one car to a huge monster truck. Of course the graphics need to match <br/>
+the settings to make it believable though!<br/>
+
+<b>Suspension range</b><br/>
+This is the length of the suspension from when it is a state of being fully compressed to the largest <br/>
+distance it can be away from the frame of the car.<br/>
+<b>Suspension spring</b><br/>
+The value set here determines the stiffness of the suspension spring. Setting it very high makes it <br/>
+more likely that the suspension will be fully extended, so that the wheels will be far away from the <br/>
+frame, and setting it very low will make the suspension much more bouncy. When tweaking this <br/>
+value, it will be clear that the mass of the car also has a lot to say here. A very heavy car requires a <br/>
+spring with more stiffness than a very light car. By default we have set the rear suspension spring <br/>
+to be less stiff than the front and the reason is that the center of mass is distributed more to the <br/>
+front side, requiring better suspension there. Playing around with different values for both front <br/>
+and rear suspension can yield very different results.<br/>
+<b>Suspension damper</b><br/>
+Dampening helps controlling the motion in the suspension. Without dampening, the suspension <br/>
+spring would extend and release it’s energy at an uncontrollable rate - it would extend at it’s natu-<br/>
+ral spring frequency until all the energy stored in it was used up. This would result in an extremely <br/>
+bouncy and uncontrollable car. The damper or shock controller turns the unwanted kinetic energy <br/>
+into heat that gets transferred away in the hydraulic ﬂ uid, making the ride a lot smoother.<br/>
+<b>Drag Multiplier</b><br/>
+
+<img src="media/CarTutorialSection_2-7_4.png"/><br/>
+
+When we added the Rigidbody to the car, we saw that it had a drag property. This drag is the <br/>
+intertia or air resistance that affects the Rigidbody, making it harder to move. When a car is de-<br/>
+signed, a lot of consideration is often put into giving it a shape that minimizes the friction from the <br/>
+air resistance when it moves. But since a car is meant to move forwards, the shape takes this into <br/>
+account - just take a look at the car model in the editor from the front, the sides and the top, and <br/>
+you will realize that it is a lot more streamlined when seen from the front than from sides and top.<br/>
+We take this into account by creating our own drag multiplier property that we use instead of the <br/>
+drag property built into the rigidbody. Take a look at the Car script component in the Inspector, <br/>
+where you will see that we have a <b>Drag Multiplier</b> variable, which is a vector with x, y and z values.<br/>
+This makes it possible for us to set different drag values for the front, sides and top of the car, mim-<br/>
+icking the real conditions when driving a car more accurately.<br/>
+• <br/>
+The X value is the drag to the side<br/>
+• <br/>
+The Y value is the drag to the top<br/>
+• <br/>
+The Z value is the drag to the front<br/>
+The x value is important in controlling the force that prevents the car from sliding sideways when <br/>
+turning. The higher the x value the more sideways resistance.<br/>
+The z value is by far the most interesting one because it can lower or increase the force that slows <br/>
+the car’s velocity down. If you set it to less than 1 you will get less resistance, faster acceleration <br/>
+and a higher top speed. More than 1 and the car must struggle against a more powerful force in <br/>
+order to move forwards, making it slower. The drag values are very sensitive, so you are advised to <br/>
+experiment with small changes when tweaking the drag.<br/>
+
+Since the car is not supposed to travel upwards, the y value is not as interesting to change. The most <br/>
+important force controlling the car in the y-axis is after all the gravity that affects the rigidbody.<br/>
+Speed, turning and gears<br/>
+Now we’ve gotten to the more obvious variables that also has a quite large impact on your cars <br/>
+behavior.<br/>
+The <b>Top Speed</b> variable is a no-brainer: This sets how fast (or slow) your car can go. Since our car <br/>
+model is a lot simpler than a model for a real car, and we for example don’t really have any values to <br/>
+set that affects it’s acceleration (except the drag), the Top Speed variable will also indirectly affect <br/>
+the acceleration. Making the car very fast will also make it reach a high velocity equally higher and <br/>
+vise versa. If you want to play with top speed and acceleration, you could try tweaking both the Top <br/>
+Speed value and the  drag’s z variable (which was the air resistance in the forward direction)<br/>
+For turning we have two variables - <b>Maximum Turn</b> and <b>Minimum Turn</b>. Both are values for how <br/>
+good the car is at turning. A high value means excellent turning and a low value is very limited <br/>
+turning ability. We are using them together in the car’s script to change the cars ability to turn <br/>
+based on how fast it is going:<br/>
+•  At very low speeds, it is the value set for <b>Maximum Turn</b> that is used when turning.<br/>
+•  The higher the car’s speed gets, the closer it’s turning ability gets to the <b>Minimum Turn</b>.<br/>
+What this adds up to when using the default values for the Car (which are 10 for minimum and 15 <br/>
+
+for maximum) is that it gets harder to turn when you go fast. This gives a more realistic feel, ensur-<br/>
+ing that you can’t just go at full speed into a hairpin bend and expect the car to survive it. You can <br/>
+experiment with both values to make the car better or worse at turning and for making the differ-<br/>
+ence between turning when going slow and fast higher or lower.<br/>
+Finally we have exposed the<b> Number Of Gears</b> variable. When we get to the part where we look <br/>
+inside the Car script we will see what this is used for calculating. Since the car is based on a simple <br/>
+model, the gears are not mimicking real gear behavior. However, they are used to calculate the <br/>
+engine forces, and maybe more importantly they are used in the script controlling the sound, to <br/>
+change the sound of the engine’s pitch, based on what gear we are currently in, and how fast <br/>
+we are currently going. This makes the car sound like it is starting at low RPM in each gear, and <br/>
+increasing the RPM until it reaches the limit, where it will switch the gear. Setting this value to an-<br/>
+other number of gears simply creates an illusion through sound of how many gears the car has.<br/>
+Exporting the car as a package<br/>
+If you have followed along and assembled your own version of the car, you now have the knowl-<br/>
+edge needed to implement it in your own projects. An easy way to transfer it across projects is to <br/>
+make a Unity Package from the needed Prefabs.<br/>
+First lets turn the car we made into a Prefab so it can be reused without doing the assembling and <br/>
+tweaking:<br/>
+
+<img src="media/CarTutorialSection_2-10_4.png"/><br/>
+
+•  In the Project view click ‘<b>Create</b>’ and select ‘<b>Prefab</b>’. You will get an empty Prefab in the project <br/>
+view named ‘new prefab’. <br/>
+
+•  Rename the Prefab to ‘<b>Race Car</b>’ (a nice palindrome) or any other name to your liking. <br/>
+•  Drag the <b>Car</b> GameObject from the Hierarchy view and onto the Prefab.<br/>
+This has already been done for you though (it is in <b>Prefabs/Car</b>), but now you also have your own.<br/>
+There are a few parts that are needed apart from the Car Prefab in order to create a package that <br/>
+just works from scratch. These are the <b>Skidmarks</b>, <b>Main_Camera</b><br/>
+and <b>Directional_Light_Car_Road</b>. Fortunately they have been <br/>
+made into Prefabs already.<br/>
+There are also a few scripts that we need to include in our package, <br/>
+which won’t get included if we don’t specify it: <b>SoundToggler.js</b>, <br/>
+<b>ImageEffects.cs</b> and <b>ImageEffectsBase.cs</b> The reason is that these <br/>
+scripts are not included in the scene, but used through scripting <br/>
+when the game runs. The image scripts are included in the Pro <br/>
+Standard Assets, but we are including them in the package so it <br/>
+can be imported into a completely empty project and just work.<br/>
+• <br/>
+In the Project view select all of these items:<br/>
+• <br/>
+Prefabs/VFX: <b>Directional_Light_Car_Road</b>, <b>Main_Camera</b>, <br/>
+<b>Skidmarks</b><br/>
+• <br/>
+scripts/Javascripts: <b>SoundToggler.js</b><br/>
+• <br/>
+Pro Standard Assets/Image Based/<b>ImageEffects.cs</b> and <br/>
+<b>ImageEffectsBase.cs</b><br/>
+
+•  The <b>Car Prefab</b> that you created.<br/>
+•  Click ‘Export package...’<br/>
+•  In the pop-up make sure that Include dependencies is checked. This will gather all Assets that <br/>
+your selection depends on with the exception of assets that are only accessed through scripting.<br/>
+•  Click ‘Export’, choose a name for your package and save it.<br/>
+The process of getting your Car into your own project is now simple:<br/>
+•  In your new project go to Assets-&gt;Import package...<br/>
+•  Navigate to the package you saved and open it.<br/>
+•  Make sure that everything is selected (Click ‘All’) and then click import.<br/>
+•  Unity will import all the Assets and the prefabs will appear in your Project view, ready to be <br/>
+dragged into a scene.<br/>
+You are totally free to take the car and use it in your own projects, and now you have the know-<br/>
+ledge to put it together, tweak it and transfer it across projects - so please go ahead and make a <br/>
+really awesome driving game!<br/>
+
+<hr/>
+</body>
+</html>

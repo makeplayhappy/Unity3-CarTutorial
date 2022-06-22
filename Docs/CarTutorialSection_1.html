@@ -1,0 +1,343 @@
+<!DOCTYPE html><html>
+<head>
+<title>Unity3D 3 Car Tutorial Part 1</title>
+<style type="text/css">
+<!--
+.xflip {
+    -moz-transform: scaleX(-1);
+    -webkit-transform: scaleX(-1);
+    -o-transform: scaleX(-1);
+    transform: scaleX(-1);
+    filter: fliph;
+}
+.yflip {
+    -moz-transform: scaleY(-1);
+    -webkit-transform: scaleY(-1);
+    -o-transform: scaleY(-1);
+    transform: scaleY(-1);
+    filter: flipv;
+}
+.xyflip {
+    -moz-transform: scaleX(-1) scaleY(-1);
+    -webkit-transform: scaleX(-1) scaleY(-1);
+    -o-transform: scaleX(-1) scaleY(-1);
+    transform: scaleX(-1) scaleY(-1);
+    filter: fliph + flipv;
+}
+-->
+</style>
+</head>
+<body>
+<a name=1></a><img src="media/CarTutorialSection_1-1_1.png"/><br/>
+<h1>“The Car Tutorial” Part 1</h1>
+<h2>Creating a Racing Game for Unity</h2>
+<hr/>
+<img src="media/CarTutorialSection_1-2_4.png"/><br/>
+
+<h1>“The Car Tutorial”― Creating a Racing Game for Unity, Part 1</h1>
+<h2>Introduction</h2><br/>
+The aim of this tutorial is to show you how to create a racing game with Unity. We are going to <br/>
+assemble a car from a 3d model, scripts and Components. We provide you with a complete project <br/>
+of a driving game, where you can play with a ﬁ nished scene and explore how everything is put to-<br/>
+gether. We also provide you with a scene that has everything ready but the car, which you will then <br/>
+work on completing.<br/>
+We will show<br/>
+Let us begin by talking about what this tutorial will deal with. It is divided into three distinct sec-<br/>
+tions that can worked on independently of each other:<br/>
+<b>1. Assembling the Car</b><br/>
+How to assemble a Car Prefab from a 3D model, scripts and components. This is the section you are <br/>
+reading right now.<br/>
+<b>2. Tweaking the Car</b><br/>
+How to tweak the car to behave “better” or in different ways.<br/>
+<b>3. Under the Hood</b><br/>
+A more in-depth look at the actual code that drives the car.<br/>
+<h4>Prerequisites</h4>
+The tutorial is not intended as an entry point to learning Unity. You should have a basic under-<br/>
+standing of how Unity is organized, what a GameObject is, what Components are and so on. Some 
+proficiency in scripting is also recommended. This being said, we will explain a lot of stuff along <br/>
+the way, basic and advanced. <br/>
+We will not show<br/>
+•  All the other scripts.<br/>
+•  The very basics. We will not go in depth with explaining the basic workﬂ ow and components in <br/>
+Unity. For that there are many other resources available at:<br/>
+http://unity3d.com/support/documentation/video/<br/>
+http://unity3d.com/support/resources/<br/>
+
+The User Manual and the Scripting Reference are valuable companions as you follow along this <br/>
+tutorial. We suggest that you visit these resources when ever you encounter a built in Component <br/>
+or function that you’d like to know more about.<br/>
+The approach taken at ﬁ rst is that of code monkey see, code monkey do: You follow the instruc-<br/>
+tions we give about putting a car together and changing it’s variables. Hopefully you will be curi-<br/>
+ous about how it works, learn something from seeing how everything is put together and do some <br/>
+investigation on your own. Feel free to explore.<br/>
+In the last and longest section we dive more deeply into the actual code that makes the car drive. <br/>
+This is not a line-by-line walkthrough, but we will cover most of what is going on. One way to learn <br/>
+programming or improve ones skills is to look at a lot of code (supplemented by doing a lot of <br/>
+programming). We are certain that you will learn a lot from following this closely and getting an <br/>
+understanding of how the code works together.
+<hr/>
+
+<h2>Part 1: Assembling the Car</h2>
+Download the zipped project folder from http://unity3d.com/support/resources/files/CarTutorial.zip<br/>
+Start by opening the scene named ‘<b>CompleteScene</b>’. This scene has the car already setup, so you <br/>
+can try it out by pressing the Play button. This will show you the end result of what we are going <br/>
+to build.<br/>
+When you are done playing around, open the scene named <br/>
+‘<b>TheTrack</b>’. This scene contains what is needed to race, except the <br/>
+most important part - a car.<br/>
+Now drag the car model into the Scene. In the Project view you ﬁ nd it under <b>Models/Car/catamount.</b><br/>
+Depending on where you dragged the car, you probably want to change it’s position to a more <br/>
+suitable one. I suggest that you change its position in the inspector to something like (860, 102.3, <br/>
+878) and set it’s y-rotation to 130.<br/>
+For the rest of the tutorial, this GameObject will be referred to as ‘<b>Car</b>’ so you might as well <br/>
+rename it now. <br/>
+This is just the 3D model of the car. If you look in the Inspector, you will see that it contains a number 
+of children such as the car’s body, windows and wheels. It also contains two simple meshes that 
+
+we will use for the car’s colliders. Don’t worry about them be-<br/>
+ing visible for now, we will change that. Take some time looking <br/>
+at how the car is arranged by different parts, and how they are <br/>
+related to each other in the hierarchy.<br/>
+
+<img src="media/CarTutorialSection_1-6_4.png"/><br/>
+
+For various reasons, we want the car to be in it’s own layer. With <br/>
+the Car GameObject selected, go to the Inspector and select ‘car’ <br/>
+in the layers drop down menu. In the popup menu click ‘Yes, change children’ to make the change <br/>
+apply to all GameObjects in the car’s hierarchy.<br/>
+The Car GameObject has an Animation component attached by default. Since this is not something <br/>
+we are going to use, go ahead and do a little clean up by clicking the small wheel to the right of <br/>
+the Animation Component and selecting ‘Remove Component’.<br/>
+Adding Collision<br/>
+Now we’ll set up the collision components for the car to <br/>
+prevent it from falling through the ground when running <br/>
+the scene. Instead of using complex mesh colliders based <br/>
+on the actual mesh of the car, we have setup two meshes <br/>
+that are much simpler, that ﬁ t the top and bottom of the <br/>
+car. For performance reasons, we are using these meshes <br/>
+as the collision model.<br/>
+<img src="media/CarTutorialSection_1-6_5.png"/><br/>
+
+• <br/>
+Click on the <b>Collider_Bottom</b> game object which is 
+located as a child of the Car.<br/>
+•  Go to the <b>Component/Physics</b> Menu and click the <b>MeshCollider</b> to add one to the game object.<br/>
+•  Click the <b>Material</b> dropdown-selector on the newly added MeshCollider component and select <br/>
+the Car physics material.<br/>
+•  Check the two boxes ‘<b>Smooth Sphere Collisions</b>’ and ‘<b>Convex</b>’<br/>
+•  Since the colliders are going to be invisible, go ahead and remove the <b>MeshRenderer</b> and <b>Mesh </b><br/>
+<b>Filter</b> Components from the GameObject (Click the small cog wheel to the right of the Compo-<br/>
+nents and select ‘Remove Component’.<br/>
+•  Do the same as above for the <b>Collider_Top</b> game object.<br/>
+Shadow settings for the car model<br/>
+We are going to change the shadow settings for the car model for two reasons. First of all turning <br/>
+off shadow casting or receiving for objects that don’t really need it is very good practice for per-<br/>
+formance reasons. Second of all we feel that it looks better to not have the car receive shadows. It <br/>
+might be more pleasing to the eye that shadows are not constantly appearing and disappearing on <br/>
+the car when it is traveling at high velocity under the level geometry. It’s up to you what you prefer <br/>
+though. If you want more realistic shadow behavior, it is entirely possible. Just change the settings <br/>
+according to your liking.<br/>
+The settings we use for the various parts of the car are the following:<br/>
+<b>Body</b>: Cast Shadows <b>enabled</b>. Receive Shadows <b>disabled</b>.<br/>
+<b>Body Interior</b>: Cast Shadows <b>enabled</b>. Receive Shadows <b>disabled</b>.<br/>
+<b>Car Windows</b>: Cast and Receive Shadows <b>disabled</b><br/>
+
+
+
+
+
+<b>DiscBrakes</b>: Cast and Receive Shadows <b>disabled</b><br/>
+<b>Wheels</b>: Cast Shadows <b>enabled</b>. Receive shadows <b>disabled</b>.<br/>
+<img src="media/CarTutorialSection_1-8_4.png"/><br/>
+<hr/>
+
+<h2>Adding the Car’s Components</h2>
+Now let’s start adding the components needed to make the car actually work onto the Car <br/>
+GameObject.<br/>
+First of all, we need a way to control the car’s position in the <br/>
+world by physical simulation, and the built-in RigidBody com-<br/>
+ponent is perfect for that. With the Car Game Object selected, <br/>
+go to the <b>Components</b> menu and select <b>Physics/RigidBody.</b> Ac-<br/>
+cept the message Unity gives you about losing prefab connec-<br/>
+tion, and observe how the GameObject now has a Rigidbody attached as one of it’s components.<br/>
+•  The car obviously weighs more than just one kilo, so start by changing the Rigidbody’s <b>mass</b> to <br/>
+something more realistic like 1500.<br/>
+•  Next we have the <b>drag</b> and <b>angularDrag</b> properties, which are forces that slow down the Rigid-<br/>
+body’s speed and rotation. We will control the drag of the car through scripting, so just set the <br/>
+drag and angularDrag properties to 0.<br/>
+•  Locate the <b>Car.js</b> script in the folder ‘<b>scripts/JavaScripts</b>’ and drag it onto the Car GameObject. <br/>
+This script is the “engine” of the car, and is the script we will focus on explaining the most at <br/>
+the end of this tutorial.<br/>
+
+<hr/>
+
+
+
+The Car-script component has a lot of different variables that will be explained when we start <br/>
+tweaking the car, and even more when we walk through the code. For now we just want to setup <br/>
+what is needed to be able to take the car for a quick test run.<br/>
+
+<img src="media/CarTutorialSection_1-9_4.png"/><br/>
+
+First of all, the car script needs to know about the <br/>
+wheels that the car has. In the Inspector you will <br/>
+see the <b>Front Wheels</b> and the <b>Rear Wheels</b>, and <br/>
+notice that both of them can be expanded by click-<br/>
+ing on the small arrow to the left of the names.<br/>
+•  Set the <b>size</b> of the Front and Rear Wheels to 2, making room for two front wheels and two <br/>
+rear wheels.<br/>
+•  Now expand the <b>WheelFL</b>, <b>WheelFR</b>, <b>WheelRL</b> and <b>WheelRR</b> in the inspector. You will see <br/>
+that they each have a DiscBrake as a child, and that each disc brake has a wheel as a child. For <br/>
+now you should be content with knowing that the disc brake and wheel game objects are the <br/>
+graphical representation of the wheel.<br/>
+•  Drag the <b>DiscBrakeFL</b> and <b>DiscBrakeFR</b> to the two open slots in the <b>Front Wheels </b>under the <br/>
+Car script and the <b>DiscBrakeRL</b> and <b>DiscBrakeRR</b> to the slots under the <b>Rear Wheels</b>.<br/>
+•  You might ask - why are the <b>DiscBrakes</b> the wheels? And the explanation is simple: The disc <br/>
+brakes are parent Game Objects to the tire graphics, so setting the discs as wheels will in-<br/>
+clude the tires.
+
+<hr/>
+
+<img src="media/CarTutorialSection_1-10_4.png"/><br/>
+
+
+<h2>Adding a blob shadow</h2>
+The directional light will make the car cast a <br/>
+nice shadow on the road if shadows are enabled <br/>
+in your project. But we also want to add the <br/>
+shadow that is under the car, as seen in the im-<br/>
+age here.<br/>
+For that we will use a projector that projects a <br/>
+blob shadow resembling the shape of the car <br/>
+onto the road directly under the car.<br/>
+A projector is a built-in component that works just like a real life projector. You specify the texture <br/>
+that you want it to transmit, and based on the settings for the projector and the distance to the <br/>
+target(s), it will draw this texture onto the objects that are in it’s way.<br/>
+•  In the Hierarchy, create an empty GameObject and drag it to the Car to make it a child of it.<br/>
+•  Name it ‘<b>Blob shadow projector</b>’<br/>
+•  Add a <b>Projector</b> component to the Blob shadow projector (<b>Component-&gt;Renderer-&gt;Projector</b>)<br/>
+•  Set the projectors <b>Near Clip Plane</b> to 0.1, its <b>Far Clip Plane</b> to 50, its <b>Field of View</b> to 30.<br/>
+•  Assign the <b>Blob_shadow</b> material to its <b>Material</b> slot.<br/>
+•  In the ‘<b>Ignore Layers</b>’ select ‘<b>Everything</b>’ and then deselect the ‘<b>Road</b>’ layer, thus making the <br/>
+projector only cast the blob shadow on the road.<br/>
+•  Add the <b>BlobShadowController.js </b>script (in the <b>Scripts/CSharpScripts</b> folder in the Project view)<br/>
+The position and rotation of the Projector Component gets updated each frame in the Blob Shadow 
+
+
+
+Controller script, which is pretty simple. In short, it is placed 10 meters above the car and gets it <br/>
+rotation set based on the rotation of the car. You can take a look at the script and try changing the <br/>
+values if you want the car’s blob shadow on the road to look differently.<br/>
+
+<img src="media/CarTutorialSection_1-11_4.png"/><br/>
+
+<h2>Skidmarks</h2>
+Some of the things that make it fun to drive the <br/>
+car are pushing the car to slide around a corner <br/>
+or doing a u-turn at high speed. To enhance <br/>
+the effect of the wheels sliding on the road and <br/>
+make it a bit more believable, we are going to <br/>
+add some skidmarks to the surface we’re driving <br/>
+on when the car is sliding.<br/>
+The way we set the skidmarks is by having a script that controls all the skidmarks in the scene. This <br/>
+controller is responsible for creating the mesh that represents the skidmarks. Each wheel knows <br/>
+its own position, and whether or not it is sliding. We use this information to register a point in the <br/>
+world where we want the skidmark to be in relation to the skidmark controller. We let each wheel <br/>
+keep track of the previous skidmark-point so that the skidmarks from several wheels don’t get <br/>
+mixed up.<br/>
+We have created a prefab for this that you can just drag into the scene:<br/>
+
+•  Drag the <b>Skidmarks</b> prefab from Prefabs-&gt;VFX-&gt;Skidmarks into the scene.<br/>
+
+We set the intensity of the skidmarks by adjusting the color of each vertex created. The intensity is <br/>
+determined by how much the wheel is skidding. For this to take effect we use a customized shader <br/>
+that uses the alpha from each vertex when rendering the skidmarks.<br/>
+As with the car there are several things that can be changed to make the skidmarks match better to <br/>
+the car that you are trying to build. Looking at the Skidmarks Component on the <b>Skidmarks</b> game <br/>
+object you should see that there are a few public variables that can be tweaked.<br/>
+<b>Max Marks</b><br/>
+The <b>Max Marks</b> variable determines the number of positions for the skidmarks that can exist in the <br/>
+scene at any time. All the wheels are using the same <b>Skidmarks</b>, so this number counts for all wheels. <br/>
+Whenever the maximum number is reached, the ones created ﬁ rst will be overwritten.<br/>
+Increasing this number will also increase the combined length of all the pieces of skidmarks in the scene.<br/>
+<b>Mark Width</b><br/>
+The <b>Mark Width</b> sets the width of the skidmarks. This has to be adjusted to ﬁ t the wheels of the ve-<br/>
+hicle created. If it is a monster truck you are trying to make a very wide skidmark might be needed, <br/>
+and if it is a supersonic car with ultra-thin tires made for setting the ground speed record, a very <br/>
+thin skidmark could work better.<br/>
+<b>Ground Offset</b><br/>
+When the mesh for the skidmarks is created, it will be created using the points calculated from the <br/>
+wheels for positioning the skidmark patches. These points will most often be right on the surface <br/>
+of whatever the wheel was driving on at the time it was sliding. When two meshes are rendered <br/>
+
+right on-top of each other, it might give some ﬂ ickering results in the game.<br/>
+To prevent this the <b>Ground Offset</b> variable is introduced. The mesh created will be raised by the <br/>
+length of the offset in the direction of the normal of the surface that it is created over. So if some <br/>
+ﬂ ickering occurs, or the skidmarks intersect with the surface, try increasing the offset.<br/>
+To further ensure that the skidmarks are rendered on top of the ground, the shader used for the <br/>
+skidmarks has been given an offset, and has been assigned to another render queue than the <br/>
+standard one.<br/>
+<b>Min Distance</b><br/>
+When a new point is added to the <b>SkidmarkController</b> it has to be <b>Min Distance </b>away from the <br/>
+last skidmark point added by the same wheel. That ensures that you don’t waste points on adding <br/>
+skidmarks on a very small area. Don’t set this value too high though, since that might make the <br/>
+patches of the skidmarks too long, and furthermore an increased distance might appear as lag, i.e. <br/>
+the skidmarks appear behind the wheels. Decreasing the value will, to some extent, smooth the <br/>
+skidmarks, and make the skidmarks be created closer to the wheels.<br/>
+<b>Texture</b><br/>
+The tire pattern for the tires on a monster truck are quite different compared to the tire patterns <br/>
+on wheels from a formula one racer. The texture used for the skidmarks resembles the marks the <br/>
+given tire pattern of the wheels will make on the surface. If you created another type of car, with <br/>
+very different wheels, you would need to change this texture if you want the skidmarks to match <br/>
+the wheel.<br/>
+
+<hr/>
+
+<img src="media/CarTutorialSection_1-14_4.png"/><br/>
+
+<h2>Adding Sound</h2>
+•  Add the<b> SoundController.js </b>script to the Car game Object. (Drag it from Scripts/JavaScripts/Sound-<br/>
+Controller.js).<br/>
+The Sound Controller component has several slots for audio, that we need to assign the different <br/>
+audio ﬁ les to. The audio ﬁ les are in the Sound/Car folder in the Project view. Drag the:<br/>
+• <br/>
+<b>CarEngine_D_upper-register</b> to the <b>D</b> slot. <br/>
+Set the <b>Volume</b> to 0.565<br/>
+• <br/>
+<b>CarEngine_E_midlow-register</b> to the <b>E</b><br/>
+slot. Set the <b>Volume</b> to 0.8<br/>
+• <br/>
+<b>CarEngine_F_midhigh-register </b>to the <b>F</b><br/>
+slot. Set the <b>Volume</b> to 0.78<br/>
+• <br/>
+<b>CarEngine_K_passing-rush</b> to the <b>K</b> slot. <br/>
+Set the <b>Volume</b> to 0.565<br/>
+•  <b>CarEngine_L_lower-register </b>to the <b>L</b> slot. Set the <b>Volume</b> to 0.71<br/>
+•  <b>Wind-loop_stereo_22khz_16bit </b>to the <b>Wind</b> slot. Set the to <b>Volume</b> 0.8<br/>
+•  <b>CarEngine_DEFL_tunnel-add_small</b> to the <b>Tunnel Sound</b> slot. Set the <b>Volume</b> to 0.8<br/>
+•  <b>Collision1</b> to the<b> Crash Low Speed Sound</b> slot. Set the <b>Volume</b> to 0.8<br/>
+•  <b>Car_crash1_smaller</b> to the <b>Crash High Speed Sound</b> slot. Set the <b>Volume</b> to 0.5<br/>
+•  <b>Car_skid1</b> to the <b>Skid Sound</b> slot<br/>
+•  <b>CarTutorialSong</b> to the <b>Background Music</b> slot. Set the <b>Volume</b> to 1.<br/>
+
+<hr/>
+
+<img src="media/CarTutorialSection_1-15_4.png"/><br/>
+
+The volume settings are of course just suggested values. You can play around with different values <br/>
+to get the exact sound image that you prefer. Or you could take it even further and build your own <br/>
+settings menu for sound, allowing to tweak volume for music and effects separately in-game.<br/>
+Finalizing the Assembling<br/>
+Finally drag the following scripts onto the Car game object: <br/>
+•  <b>LightmapperObjectUV.js</b> (from scripts/JavaScripts)<br/>
+•  <b>CrashController.js</b> from (scripts/JavaScripts)<br/>
+•  <b>Generate2DReﬂ ection.cs</b> (from Scripts/CSharpScripts)<br/>
+We need to do one ﬁ nal thing before we can try out the stuff we just created. The camera needs <br/>
+to know what to look at and follow, otherwise we’ll just drive the car out of the view as soon as we <br/>
+start moving.<br/>
+•  Go to the <b>Main_Camera</b> Game Object and set its <b>Target</b> (under the Car Camera script compo-<br/>
+nent) to the <b>Car</b> Game Object. <br/>
+
+<hr/>
+</body>
+</html>

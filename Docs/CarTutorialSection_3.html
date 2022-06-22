@@ -1,0 +1,499 @@
+<!DOCTYPE html><html>
+<head>
+<title></title>
+<style type="text/css">
+<!--
+.xflip {
+    -moz-transform: scaleX(-1);
+    -webkit-transform: scaleX(-1);
+    -o-transform: scaleX(-1);
+    transform: scaleX(-1);
+    filter: fliph;
+}
+.yflip {
+    -moz-transform: scaleY(-1);
+    -webkit-transform: scaleY(-1);
+    -o-transform: scaleY(-1);
+    transform: scaleY(-1);
+    filter: flipv;
+}
+.xyflip {
+    -moz-transform: scaleX(-1) scaleY(-1);
+    -webkit-transform: scaleX(-1) scaleY(-1);
+    -o-transform: scaleX(-1) scaleY(-1);
+    transform: scaleX(-1) scaleY(-1);
+    filter: fliph + flipv;
+}
+-->
+</style>
+</head>
+<body>
+<a name=1></a><img src="media/CarTutorialSection_3-1_1.png"/><br/>
+<h1>“The Car Tutorial” Part 3</h1>
+<h2>Creating a Racing Game for Unity</h2>
+
+<hr/>
+
+<img src="media/CarTutorialSection_3-2_4.png"/><br/>
+
+
+<h2>Part 3: Under the Hood </h2>
+
+<br/>
+We’ve covered how to assemble a working car from a 3d model, scripts and built-in Components. We <br/>
+have also looked at the exposed variables and how they can be used to tweak the car’s behavior. <br/>
+Now it’s about time we look more in-depth at the ﬁ ne mechanics inside the engine of the car - The <br/>
+Car-script.<br/>
+•  Double click on the <b>Car.js</b> script to open it with your code editor.<br/>
+This script can at ﬁ rst glance be a little intimidating, spanning 500+ lines of codes and comments, <br/>
+and a lot of variables and functions. Don’t despair though. The script is structured so that we have <br/>
+relatively small functions with meaningful names, that does exactly what they say they do. Follow-<br/>
+ing this, the code is not littered with comments that explains everything again - simply because the <br/>
+code is telling it’s own story.<br/>
+The way we suggest you to look at it is to ﬁ nd the best entry points and then follow along. In this <br/>
+case these entry points will be the <b>Start()</b>, <b>Update()</b> and <b>FixedUpdate()</b> functions.<br/>
+Each of these “main” functions are calling other functions. So when we begin by looking at the <br/>
+<b>Start()</b> function, we see that the ﬁ rst function called is <b>SetupWheelColliders()</b>. Locate that function <br/>
+in the code and study what it does, and then go back to <b>Start()</b> and go to the next function which <br/>
+is <b>SetupCenterOfMass()</b>. By following this code trail you get the overview over what is actually hap-<br/>
+pening in code, that makes the car work the way it does.<br/>
+
+
+In the following we will look at all those functions. We are not going to explain each line of code, <br/>
+but we are providing an entry point and going through everything essential that takes place from <br/>
+the setup to what happens each frame. So without further ado, let us start at the beginning.<br/>
+Which are the most important things?<br/>
+Working inside Unity is easy in so many ways, because of stuff like the editor, the drag and drop <br/>
+workﬂ ow and all the built in components. Setting up the Car is half-way there - Unity takes care of <br/>
+importing the model, we get collision, rendering and physics setup for us with just a few clicks to <br/>
+add the Components.<br/>
+Inside our script, we are mainly working at manipulating these Components. You will of course <br/>
+stumble upon a lot of calculations that we use to determine what happens to the car. This is an <br/>
+unavoidable part of doing real games: You have to setup some logic through for example scripting <br/>
+when you want to do more than just the basics. But these calculations are just that: Calculations to <br/>
+get the right values to feed to our Components.<br/>
+If you feel that the code is overwhelming and don’t know where to start, one approach could be to <br/>
+focus on the following items, and consider most of what else is going on as something that affects <br/>
+and supports these items:<br/>
+•  The <b>Rigidbody</b><br/>
+•  The <b>Wheel Colliders</b><br/>
+•  The Calculations that we do and the order that we do them in.<br/>
+
+<img src="media/CarTutorialSection_3-5_4.png"/><br/>
+
+Think of it like this: <br/>
+•  By adding the rigidbody to our car model we have a way of controlling it in a physical way. We <br/>
+do that by calculating the forces that drive it forwards and the forces that slows it down.<br/>
+•  By adding the Wheel Colliders we get control over where the Car meets the road.<br/>
+Start() - the Setup<br/>
+This is where we do the initialization needed for the car. The <b>Start()</b> function is executed only once, <br/>
+in the beginning of the script, before the <b>Update</b> functions. Therefore Start() is often used to set <br/>
+up the initial prerequisites in the code. The ﬁ rst function we visit is:<br/>
+<b>SetupWheelColliders()</b><br/>
+We have four wheels attached to our car, and we have put them into the <b>FrontWheels</b> and <b>Rear-</b><br/>
+<b>Wheels</b> arrays from the Inspector. In this function we create the actual colliders, making the wheels <br/>
+interact with the surface below the car. We start out in the function by visiting <b>SetupWheelFrictionCurve()</b>.<br/>
+
+<hr/>
+
+<b>SetupWheelFrictionCurve()</b><br/>
+In SetupWheelFrictionCurve() we simply create a new <b>WheelFrictionCurve</b> and assign it the val-<br/>
+ues that we think are appropriate for our car. A WheelFrictionCurve is used by WheelColliders to <br/>
+describe friction properties of the wheel tire. If you want to get serious with using Unity’s built in <br/>
+WheelColliders, stop by the documentation.<br/>
+<b>SetupWheel()</b><br/>
+After setting up the curve, we are back in <b>SetupWheelColliders()</b>, ready to create the actual collid-<br/>
+ers and Wheel objects. This is done by calling the function <b>SetupWheel()</b> for each of our wheels. If <br/>
+you look at that function, you will see that it takes two parameters: A Transform and a boolean, <br/>
+and returns a Wheel object. What we do is, that we feed this function with the transform of each <br/>
+of our wheel transforms, and stating whether or not this wheel is a front wheel. The function then <br/>
+creates and returns a Wheel object that we put into our <b>wheels</b> array, which holds all our wheels <br/>
+for the rest of the script:<br/>
+for (var t : Transform in frontWheels) {<br/>
+   wheels[wheelCount] = SetupWheel(t, true);<br/>
+   wheelCount++;<br/>
+}<br/>
+Inside <b>SetupWheel()</b> it’s actually rather simple what we do: We create a new GameObject and give <br/>
+it the same position and rotation as the wheel we are currently processing. Then we add a Wheel-<br/>
+Collider component to that GameObject.<br/>
+
+We set the properties of the <b>WheelCollider</b> from the suspension variables that we discussed when <br/>
+we tweaked the car (the suspension range, spring and damper).<br/>
+Then we create a new <b>Wheel</b> object and feed it the properties it needs: The collider we created, the <br/>
+WheelFrictionCurve, the graphics for the wheel (which is the <b>DiscBrake</b> object we dragged to the <br/>
+inspector when we set up the car) and the graphics for the tire (which is the child of the DiscBrake).<br/>
+We set the radius of the wheel automatically, based on the size of the tire:<br/>
+wheel.collider.radius = wheel.tireGraphic.renderer.bounds.size.y / 2;<br/>
+Finally we check whether the wheel we just created is a front wheel or a rear wheel by looking at <br/>
+the <b>true</b> or <b>false</b> value that we passed to the <b>SetupWheel()</b>. If it is a rear wheel, we set its drive-<br/>
+Wheel variable to true, and if it is a front wheel we instead set its steerWheel variable to true. <br/>
+Later in the code we are making sure that the car can only drive if at least one of the drive wheels <br/>
+are touching the ground, and only steer if at least one steer wheel is on ground.<br/>
+Additionally we do a little manoeuvre for the front wheel, by creating an extra game object that <br/>
+we put in between the frame of the car and the wheel. This is the Steer Column that we use later <br/>
+when we rotate the wheel when turning. Then we return the created wheel, which gets put into <br/>
+the wheel array back in <b>SetupWheelColliders()</b> and when we have processed all wheels, we exit the <br/>
+function and go back to <b>Start()</b>.<br/>
+<b>SetupCenterOfMass()</b><br/>
+This is the next function that we visit. This is a very small function, that set the rigidbody’s center of <br/>
+
+mass to the <b>CenterOfMass</b> Game Object that we created earlier. If the center of mass has not been <br/>
+set, the rigidbody will use the default that Unity calculates.<br/>
+Then we convert the top speed entered in the inspector using a small utility function:<br/>
+topSpeed = Convert_Miles_Per_Hour_To_Meters_Per_Second(topSpeed);<br/>
+The function just multiplies the <b>topSpeed</b> variable with the number 0.44704, which translates it to <br/>
+meters per second. This is setup so that we can input the desired speed in the inspector in miles per <br/>
+hour. When calculating physics, we operate with meters/second. We also have a small function do-<br/>
+ing the inverse calculation, which is useful if you for instance want to output the speed of the car <br/>
+in miles per hour.<br/>
+<b>SetupGears()</b><br/>
+Gears are automatically setup in this function by assigning a top speed to each gear and calculat-<br/>
+ing how much force is needed to accelerate the car to that given speed at each gear. The force is <br/>
+calculated using the friction and drag values supplied in the public variables, which means that this <br/>
+calculation is basically a linear z-axis version of the friction calculation in the update functions. A <br/>
+factor is multiplied on this force value to ensure that the car will accelerate to a speed higher than <br/>
+the ones assigned as thresholds for the gears. <br/>
+<b>SetUpSkidmarks()</b><br/>
+This function ﬁ nds the Skidmark game object in the scene and stores a reference to it and to it’s <br/>
+ParticleEmitter, used for smoke. The code for the skidmarks is not covered in this tutorial, but that <br/>
+
+shouldn’t stop you from opening the script and investigate it on your own. At the end of <b>Start()</b> we <br/>
+assign the x-value of our dragMultiplier array to a variable:<br/>
+initialDragMultiplierX = dragMultiplier.x;<br/>
+This is stored because we modify the x variable of the dragMultiplier when we are using the hand-<br/>
+brake, and then need to go back to the initial value again when we are not hand braking.<br/>
+That’s it for setting it all up in the <b>Start()</b> function. Now we’ll move on to the main loop of the <br/>
+script in the Update functions, which is what happens in each frame.<br/>
+Update()<br/>
+<b>GetInput()</b><br/>
+The ﬁ rst thing we do in each frame is to read the user’s input by calling the function <b>GetInput()</b>. The <br/>
+ﬁ rst two lines reads the vertical and horizontal axes and stores it in our throttle and steer variables:<br/>
+throttle = Input.GetAxis(“Vertical”);<br/>
+steer = Input.GetAxis(“Horizontal”);<br/>
+The vertical and horizontal axes can be setup in Unity’s Input Manager (<b>Edit -&gt; Project Settings -&gt; </b><br/>
+<b>Input</b>). By default the vertical axis is set to the keys ‘w’ and ‘up-arrow’ in the positive direction and <br/>
+‘s’ and ‘down-arrow’ for the negative direction, and the value that we read here is used to apply <br/>
+the throttle force later. The horizontal axis is set as the keys ‘a’ and ‘left arrow’ in one direction and <br/>
+‘d’ and ‘right-arrow’ in the other, used for steering.<br/>
+
+
+<b>CheckHandbrake()</b><br/>
+After reading the input for controlling the car, we call the <b>CheckHandbrake()</b> function. This is a <br/>
+speciﬁ c function that checks if the space key is down, and applies some logic accordingly:<br/>
+When we initially press space, we set the handbrake variable to true, starts a handbrake timer and <br/>
+changes the dragMultiplier.x value (making the car handling more shaky, resembling hand braking). <br/>
+As long as we keep on holding space, nothing more will happen, since the handbrake variable is <br/>
+now set to true.<br/>
+When space is not registered as being pressed, the code in the else block will be executed, but only <br/>
+if handbrake is set to true. This again means that the code will only happen when the user ﬁ rst lets <br/>
+go of space, because we set the handbrake variable to false inside the block. The coroutine <b>Sto-</b><br/>
+<b>pHandbraking()</b> will then be started:<br/>
+StartCoroutine(StopHandbraking(Mathf.Min(5, Time.time - handbrakeTime)));<br/>
+<b>StopHandbraking()</b><br/>
+<b>StopHandbraking()</b> takes an input variable specifying the number of seconds it should spend on get-<br/>
+ting the dragMultiplier.x back to it’s initial state. This value is given to it as the minimum of 5 and the <br/>
+handbrake timer that we started when we began handbraking. The function then spends the speci-<br/>
+ﬁ ed amount of seconds getting the dragMultiplier.x value back from it’s current value, to the initial <br/>
+value that we stored at the end of the <b>Start()</b> function, making the car handling normal again. <br/>
+
+<b>Check_If_Car_Is_Flipped()</b><br/>
+Back in <b>Update</b> we now call the function <b>Check_If_Car_Is_Flipped()</b> to perform the “Turtle-check”. <br/>
+Inside that function we check the rotation of the car. It’s perfectly valid for the car to be ﬂ ipped <br/>
+over or twisted in extreme angles, for example if we a crashing or doing some kind of insane stunt, <br/>
+but we want to eliminate the possibility that the car ends in a position where we can’t drive any-<br/>
+more. Therefore we check if the rotation is at an angle where the car is not drivable anymore, and <br/>
+if it is, we add the time since the last frame to the <b>resetTimer</b> variable. <br/>
+If this value eventually adds up to exceed the value that we have set for resetTime (5 seconds by <br/>
+default), we call the function <b>FlipCar()</b>. If the rotation of the car is not at a bad angle, we set the <br/>
+timer back to zero instead.<br/>
+<b>FlipCar()</b><br/>
+In <b>FlipCar()</b> we get the car back on it’s wheels and sets it’s speed to zero, so we can start driving <br/>
+again from a standstill.<br/>
+<b>UpdateWheelGraphics()</b><br/>
+This is the longest and most complicated function that is called from <b>Update()</b>. Fortunately there is a <br/>
+large middle section that just deals with the placement of skidmarks, which we are not getting into. <br/>
+The important part in regards to the wheels is to update their position and rotation in this function.<br/>
+For each wheel we start by checking if it is touching the ground or not. If it is, we set the position <br/>
+of the wheel graphics to the position of the point where it hits the ground, but moved upwards <br/>
+a distance equal to the radius of the wheel. This will move the center of the wheel to the correct <br/>
+position in relation to the car’s chassis.<br/>
+
+
+w.wheelGraphic.localPosition = wheel.transform.up * <br/>
+                          (wheelRadius + wheel.transform.InverseTransformPoint(wh.point).y);<br/>
+After positioning the wheel we get the velocity of the rigidbody at the point of ground impact, <br/>
+translate it to local space for the wheel and store this in the wheel object.<br/>
+w.wheelVelo = rigidbody.GetPointVelocity(wh.point);<br/>
+w.groundSpeed = w.wheelGraphic.InverseTransformDirection(w.wheelVelo);<br/>
+If the wheel we are currently processing is <b>not</b> touching the ground, we set the position of the <br/>
+wheel based on its parent wheels transform and the range of the suspension.<br/>
+Then we apply rotation to the wheel. If it is a steer wheel, we start by applying the rotation that <br/>
+visualizes steering. This is done by rotating the Steer Column Game Object that we created for the <br/>
+steer wheels earlier. We rotate it by a factor of how much we are turning the wheel (the steering <br/>
+variable that we set based on user input) multiplied with the maximum turn angle we have set up. <br/>
+Since the Steer Column is a parent to the wheel graphics, the wheel will turn with the steer column.<br/>
+For all wheels we then apply the rotation that visualizes speed, by rotating the wheel in its forward <br/>
+direction based on speed and the radius of the wheel:<br/>
+w.tireGraphic.Rotate( Vector3.right * (w.groundSpeed.z / wheelRadius) * <br/>
+                      Time.deltaTime * Mathf.Rad2Deg);<br/>
+
+                      
+<b>UpdateGear()</b><br/>
+The last function we call from <b>Update()</b> is <b>UpdateGear()</b>, which is a small function that evaluates <br/>
+what gear the car is currently in by looking at the speed compared to the speed values we set for <br/>
+each gear back in <b>SetupGears()</b> that we called from <b>Start()</b>.<br/>
+This is in fact everything that happens each frame in the <b>Update()</b> function - not that complicated, <br/>
+right? The ﬁ nal section we need to look at is the rest of the main loop, namely the physics calcula-<br/>
+tions that take place inside <b>FixedUpdate()</b>.<br/>
+FixedUpdate() - All your physics are belong to me<br/>
+When dealing with physics, it is critical to keep the calculations and operations under strict control, <br/>
+to make sure that the result is smooth and ﬂ uent. FixedUpdate is created for that purpose. It is en-<br/>
+sured to be executed at ﬁ xed time intervals. The documentation describing Update Order will tell <br/>
+you this about FixedUpdate():  “It can be called multiple times per frame, if frame rate is low; and <br/>
+it can be not called between frames at all if frame rate is high. All Physics calculations and updates <br/>
+occur immediately before FixedUpdate().”<br/>
+We have a number of functions executed from within <b>FixedUpdate()</b> and all of them are concerned <br/>
+with calculating and applying forces to the car.<br/>
+<b>UpdateDrag()</b><br/>
+The ﬁ rst one we visit is <b>UpdateDrag()</b>. Drag is the air resistance that affects the car when it is mov-<br/>
+ing, meaning that this is a force that affects the car in the opposite direction of where it’s going, <br/>
+slowing it down.<br/>
+
+
+<img src="media/CarTutorialSection_3-14_4.png"/><br/>
+
+
+We are building the drag based on the squared velocity of the car:<br/>
+Vector3(  -relativeVelocity.x * Mathf.Abs(relativeVelocity.x), <br/>
+          -relativeVelocity.y * Mathf.Abs(relativeVelocity.y), <br/>
+          -relativeVelocity.z * Mathf.Abs(relativeVelocity.z) );<br/>
+This means that with increasing velocity the drag increases even more. Squaring the velocity when <br/>
+calculating drag is based on the actual drag formula used in physics.<br/>
+Then the <b>relativeDrag</b> is scaled with the <b>dragMultiplier</b> we already looked at, to take into account <br/>
+that the car’s proﬁ le looks very different from the front, sides and top.<br/>
+If we are hand braking we apply extra forces to the sideways and forwards values of the drag, <br/>
+based on how fast the car is going, and how the car is facing relative to it’s velocity. Notice how we <br/>
+use the <b>dot product </b>between the velocity and the forward direction of the car to calculate extra <br/>
+drag in the cars forward direction. This equation results in extra drag in the forwards direction <br/>
+when the car is facing forwards (braking more) and less when it is facing more sideways (sliding). <br/>
+For the x drag value the same goes: The more the car is sliding sideways, the more we increase the <br/>
+x drag value, to slow down the car instead of letting it slide forever.<br/>
+
+<hr/>
+
+If we are not hand braking we only update the x value:<br/>
+drag.x *= topSpeed / relativeVelocity.magnitude;<br/>
+This is once again something that is simply done to make the car drive nicer - we increase the side-<br/>
+ways drag value the slower we are going to avoid the car sliding too much on the road when turning.<br/>
+In the end of the function we apply the force to the rigidbody:<br/>
+rigidbody.AddForce(transform.TransformDirection(drag) * rigidbody.mass * Time.deltaTime);<br/>
+Since the drag force is opposite to the velocity, we apply it to the rigidbody in it’s transform direc-<br/>
+tion, resulting in slowing the car down.<br/>
+<b>UpdateFriction()</b><br/>
+This function takes care of applying the friction that is between the wheels and the surface they <br/>
+are on. In that regard it is very straightforward, since we are using the WheelFrictionCurve that we <br/>
+set up in the beginning. The wheel friction curve gives a force as output, based on the measure of <br/>
+tire slip that we gave it as input. This force is separated into two directions: the forward friction <br/>
+(responsible for acceleration and braking) and the sideways friction (responsible for keeping the car <br/>
+oriented). When we assign the wheel friction curve, this takes care of updating the friction be-<br/>
+tween wheel and surface for us:<br/>
+
+
+w.collider.sidewaysFriction = wfc;<br/>
+w.collider.forwardFriction = wfc;<br/>
+We are doing one thing before that, which is changing the sideways friction force based on how <br/>
+fast the car is going in the sideways direction. This is done to avoid that the car starts sliding side-<br/>
+ways on the surface when the car is rotated in a turn.<br/>
+<b>CalculateEnginePower()</b><br/>
+Calculating the engine power that we later use to apply force to the rigidbody is relatively straight-<br/>
+forward but has a few quirks.<br/>
+•  If we are not throttling we simply decrease the engine power over time making the car slow down.<br/>
+•  If we are throttling in the <b>same direction</b> as the car is currently going (which we check with the <br/>
+<b>HaveSameSign()</b> function) we calculate a value to add to the engine force. What goes on might <br/>
+seem a bit weird:  We calculate a <b>norm power</b> that is the product of the current engine power <br/>
+divided with the maximum engine power (yielding a result between 0 and 1) and then multi-<br/>
+plying by 2. The result will be between 0 (when we are going the slowest) and 2 (when we are <br/>
+going at max power).<br/>
+Then we call the utility function <b>EvaluateNormPower()</b>. This function looks at the passed value <br/>
+and returns a number between 1 an 10 if norm power is between 0 and 1. If norm power is <br/>
+between 1 and 2 the function will return a value between 0 and 1. Confused? The number gets <br/>
+used in the equation that adds force to the engine:<br/>
+currentEnginePower += Time.deltaTime * 200 * EvaluateNormPower(normPower);<br/>
+
+
+The net result is that we add more force when we press the speeder and the car is going slow, to <br/>
+accelerate. Eventually, when the car reaches its top speed, no extra force is going to be added to <br/>
+the engine power which keeps it at a constant speed.<br/>
+•  If we are instead throttling in the opposite direction, it is equivalent to braking. In this case we <br/>
+also deduct engine force over time, only a little more than when not throttling.<br/>
+Finally the calculated engine force gets clamped between the force value for the current gear <br/>
+and the previous gear to avoid the possibility of calculating a sudden change in value that is too <br/>
+high or low.<br/>
+<b>CalculateState()</b><br/>
+This is a small function that we call now because we need to know if the car’s drive wheels and <br/>
+steer wheels are on the ground in the functions that follow. What it does is very simple:<br/>
+•  We set the variables <b>canDrive</b> and <b>canSteer</b> to false by default.<br/>
+•  Then we check each wheel in our <b>wheels</b> array to see if it is touching the ground:<br/>
+if(w.collider.isGrounded)<br/>
+If it is on the ground, we check what type of wheel it is. If it is a drive wheel, <b>canDrive</b> is set to <b>true</b>. <br/>
+If it is a steerWheel, <b>canSteer</b> is set to <b>true</b>.<br/>
+What this adds up to after this function has done its work is that if at least one drive wheel (which <br/>
+
+we set up as the rear wheels) is touching the ground, we can drive. If at least one steer wheel (the <br/>
+front wheels) is touching the ground, we can steer.<br/>
+
+<img src="media/CarTutorialSection_3-18_4.png"/><br/>
+
+
+We are now down to the last two functions, which are the ones that actually applies our calculations <br/>
+to the rigidbody of the car. We are going into slightly more detail here to leave you with a good idea <br/>
+of the logic and calculations that end up making the car drive and steer. The ﬁ rst function is:<br/>
+<b>ApplyThrottle()</b><br/>
+We only do something in this function if the <b>CalculateState()</b> function set the variable <b>canDrive</b> to <br/>
+true (meaning that at least one drive wheel is on the road).<br/>
+If we can drive, we start by comparing the <br/>
+throttle variable that is the user input we <br/>
+read with the <b>relativeVelocity.z</b> variable <br/>
+which was the velocity in the cars forward <br/>
+direction.<br/>
+If these values have the same sign - deter-<br/>
+mined by the <b>HaveSameSign()</b> utility func-<br/>
+tion - it means that we are throttling in the <br/>
+same direction as the car is going and in this <br/>
+case we are adding a throttle force to the <br/>
+rigidbody:<br/>
+
+throttleForce = Mathf.Sign(throttle) * currentEnginePower * rigidbody.mass;<br/>
+If throttle is negative (the user is pressing the brake button), the sign will be -1 and we will calcu-<br/>
+late a negative throttleForce that we add to the car which we also know has a negative velocity. <br/>
+Hence we will throttle faster backwards. The opposite is the case where the user is pressing the <br/>
+speeder button. Then we are adding a forwards throttleForce to a car that is already going for-<br/>
+wards, making it go faster forwards.<br/>
+If relativeVelocity.z and throttle have different signs on the other hand, then it must mean that we <br/>
+adding throttle in the opposite direction of the direction that the car is currently going. We are in <br/>
+other words braking or slowing down. We do that by setting the brakeForce variable based on the <br/>
+mass of the car and the force of the engine’s ﬁ rst gear:<br/>
+brakeForce = Mathf.Sign(throttle) * engineForceValues[0] * rigidbody.mass;<br/>
+Again we use the sign of the throttle because we know that throttle in this case has the opposite <br/>
+sign of the velocity, resulting in that we calculate a force opposite to where we are going.<br/>
+When we are done determining whether the car should speed up or slow down, we apply the cal-<br/>
+culated forces to the rigidbody’s forward direction:<br/>
+rigidbody.AddForce(transform.forward * Time.deltaTime * (throttleForce + brakeForce));<br/>
+
+
+<img src="media/CarTutorialSection_3-20_4.png"/><br/>
+
+
+<b>ApplySteering()</b><br/>
+Unless you are creating a drag racing game where you are trying to set the world speed record on a <br/>
+straight section, steering is as important as throttling, so lets wrap it up by applying the steering. We <br/>
+did not apply any throttle force if no drive wheels were touching the ground, and the same goes for <br/>
+this function where we do not apply any steering if no steer wheels are touching the ground.<br/>
+In the beginning of the function we calculate a variable named <b>turnRadius</b>, based on the input. <br/>
+The equation makes the <b>turnRadius</b> increase when you are turning to either side. We calculate a <br/>
+minMaxTurn value by visiting the EvaluateSpeedToTurn() function.<br/>
+<b>EvaluateSpeedToTurn()</b><br/>
+This function returns a turn value depending on how fast the car is going, as explained when we <br/>
+looked into tweaking the car. The faster the car is going, the closer this value will get to <b>minimum-</b><br/>
+<b>Turn</b>, making it harder to turn when going fast.<br/>
+Back in ApplySteering(), the <b>turnSpeed</b> we calculate directly relates to the <b>turnRadius</b> and the car’s <br/>
+
+forward velocity. The bigger the radius is, the smaller the angle we turn each frame because the circle <br/>
+we turn in is bigger.<br/>
+
+<img src="media/CarTutorialSection_3-21_4.png"/><br/>
+<img src="media/CarTutorialSection_3-21_5.png"/><br/>
+
+
+Then we rotate the car:<br/>
+transform.RotateAround( transform.position + transform.right * turnRadius * steer, <br/>
+                        transform.up, <br/>
+                        turnSpeed * Mathf.Rad2Deg * Time.deltaTime * steer );<br/>
+The <b>RotateAround()</b> function rotates a transform around a speciﬁ ed point and axis, and takes an <br/>
+angle which is the amount it turns. <br/>
+•  The point we turn around is the exact middle of the car when we are not turning at all. When we <br/>
+start pressing the buttons to steer, the point moves away from the car, to the side it is turning. <br/>
+Remember that the steer variable was retrieved from the horizontal input axis which is negative <br/>
+when we turn left and positive when we turn right. turnRadius and steer both grow bigger the <br/>
+more we turn. When we multiply them with the vector transform.right, we get a point that is <br/>
+based in the car’s center and moved to the steering side, as shown in the following pictures:<br/>
+
+•  The axis we turn around is the y-axis (up), meaning that we rotate the car in the x-z plane - we <br/>
+rotate the car around the line shown in the pictures.<br/>
+•  The angle is then based on the turnSpeed we just calculated, multiplied with steer to get the <br/>
+left/right direction.<br/>
+Now we are going inside:<br/>
+if(initialDragMultiplierX &gt; dragMultiplier.x)<br/>
+Which we recognize as being true when we are hand braking. In there we check whether or not we <br/>
+are steering while handbraking.<br/>
+If we are not steering, we check if the car is currently in the process of turning by looking at the <br/>
+<b>angularVelocity.y</b> value of the rigidbody. <br/>
+If this value is zero or very low, we are not turning, or turning very little and then we apply a ran-<br/>
+dom value to the rotation direction. This will simulate the shakiness of the car when handbraking <br/>
+and going straight ahead.<br/>
+If the value is not very low, we instead apply the actual angularVelocity.y value to the rotation <br/>
+direction. If we are in fact steering, rotation direction will be -1 when going left and 1 when going <br/>
+right (because rotation direction by default is set to the Sign of steer.<br/>
+
+<img src="media/CarTutorialSection_3-23_4.png"/><br/>
+
+When the extra hand brake rotation direction has been established, we apply the rotation to the <br/>
+car, but this time around another point:<br/>
+frontWheels[0].localPosition + frontWheels[1].localPosition) * 0.5<br/>
+This point is between the two front wheels and when the car rotates around it the result will be <br/>
+that it’s rear end moves to the rotation side while the front end keeps its position - allowing the car <br/>
+to slide in a cool way when you pull the handbrake at high speed while turning.<br/>
+Now the circle is complete and the Update()  and LateUpdate() functions will run all over from the <br/>
+top in the next loop. Only next time the input values will be different because of player input and <br/>
+road conditions, and we will get different forces calculated, creating the experience of driving a <br/>
+real car.<br/>
+
+<hr/>
+
+And that wraps it up. Hopefully you’ve enjoyed putting a car together, playing with it’s variables <br/>
+and looked inside the code with us.<br/>
+If you want more, we have one ﬁ nal section for you. We have also included a real physics model for <br/>
+your viewing/driving pleasure. But this time you are on your own.<br/>
+<b>Real Physics Model</b><br/>
+At the very bottom of the Project view you will ﬁ nd a folder named <b>~AlternatePhysicsModel.</b> This <br/>
+folder contains some scripts and sample Prefabs to simulate realistic car physics in Unity. The simu-<br/>
+lation presented here does not make use of Unity’s wheel colliders, but instead implements its own <br/>
+wheel collider in script based on Physics.Raycast. The script then uses a Pacejka “Magic Formula”-<br/>
+based tire model to calculate wheel forces to apply to the car, which gives better results.<br/>
+Chances are, you don’t need to know about the internal workings of the physics model. If you <br/>
+just want to play around with it, the best approach is to take the example prefabs, and start <br/>
+tweaking values, and see what happens. If you open the scripts, you’ll see that all parameters are <br/>
+explained in the comments. Try tweaking values a little at a time to get a feeling for it.<br/>
+The included Prefabs<br/>
+The folder contains ﬁ ve car Prefabs, and the skidmarks Prefabs. To try it, just drag one of the cars <br/>
+and the skidmarks Prefab into the scene (of course, the skidmarks Prefab is probably already in <br/>
+the scene). You should now be able to drive around the scene with the car using the arrow keys. <br/>
+
+There are four realistic cars with very different characteristics included, to let you experiment with <br/>
+different physics setups, and one sports car with a more arcade-style setup (unrealistic high grip).<br/>
+All the car artwork used here are free models downloaded from the Internet for demonstration <br/>
+purposes, and not actually well suited for use in games.<br/>
+The scripts are all based on realistic laws of physics, with the exception of the TractionHelper <br/>
+script, which is designed to make ﬁ shtailing cars more controllable with digital inputs. It acts <br/>
+somewhat similar to how real-life ESP systems do.<br/>
+The included scripts<br/>
+<b>AerodynamicResistance.cs</b>: One copy of this script should be added to each car to calculate the car’s <br/>
+aerodynamic friction.<br/>
+<b>AntiRollBar.cs</b>: Optionally add up to one of these per axle to simulate anti-roll-bars for better handling.<br/>
+<b>CarController.cs</b>: The script to handle car input. One of these is needed for each car. Edit this script, <br/>
+if you want to change how the car is controlled, or implement AI or network controlled cars. Also <br/>
+sets up some characteristics of the cars chassis, such as center of gravity and inertia.<br/>
+<b>Drivetrain.cs</b>: A car’s engine and drive train. This is where you set up gear box and engine specs. <br/>
+One of these is needed per car.<br/>
+<b>Skidmarks.cs</b>: Global skidmarks manager. Add one Skidmarks prefab to your scene, which uses this <br/>
+class to render and manage skidmarks for all cars.<br/>
+<b>SoundController.cs</b>: Simple class to play engine and skid sounds. One of these should be added per car.<br/>
+<b>TractionHelper.cs</b>: Optionally add one instance of this per car, to make the car more stable.<br/>
+<b>Wheel.cs</b>: This simulates the tire traction and wheel suspension model, and acts as a replacement <br/>
+for Unity’s built-in Wheel Collider.<br/>
+<b>Wing.cs</b>: Add one or more of these if you want to simulate lift or downforce aerodynamics for your car.<br/>
+
+<img src="media/CarTutorialSection_3-26_4.png"/><br/>
+<hr/>
+</body>
+</html>
